@@ -66,6 +66,10 @@ createPerimeter({
       return this.isAdmin() || (this.isCreator(article) && this.isModerator());
     },
 
+    routeUpdate({route}) {
+      return this.isAdmin() || (this.isCreator(route.params.articleId) && this.isModerator());
+    },
+
     // if user can update articles then she can also destroy them
     destroy(article) {
       return this.isAllowed('update', article);
@@ -273,7 +277,7 @@ export default (context) => {
         ],
       });
 
-      return sandbox.guard(action, { redirect });
+      return sandbox.guard(action, context);
     }
   });
 }
@@ -303,7 +307,7 @@ import articlesPerimeter from '~/perimeters/articles';
 // This component will only be accessible if user can update articles
 export default {
   routePerimeter: articlesPerimeter,
-  routePerimeterAction: 'update'
+  routePerimeterAction: 'routeUpdate'
 }
 ```
 
@@ -313,9 +317,9 @@ The implementation of your default routing governess might look like this:
 import { HeadGoverness } from 'vue-kindergarten';
 
 export default class RouteGoverness extends HeadGoverness {
-  guard(action, { redirect }) {
-    if (this.isNotAllowed(action)) {
-      redirect('/');
+  guard(action, context) {
+    if (this.isNotAllowed(action, context)) {
+      context.redirect('/');
     }
   }
 }
